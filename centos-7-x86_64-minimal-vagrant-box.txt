@@ -1,0 +1,39 @@
+install
+text
+cdrom
+skipx
+
+lang en_US.UTF-8
+keyboard us
+timezone UTC
+rootpw vagrant
+user --name=vagrant --password=vagrant
+network --onboot yes --device eth0 --bootproto dhcp --noipv6 --hostname vagrant-centos-7.vagrantup.com
+auth --enableshadow --passalgo=sha512 --kickstart
+firewall --disabled
+selinux --permissive
+bootloader --location=mbr
+zerombr
+clearpart --all --initlabel
+autopart
+firstboot --disable
+reboot
+
+%packages --nobase
+@core
+%end
+
+%post
+/usr/bin/yum -y install sudo curl
+/bin/echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/vagrant
+/bin/echo "Defaults:vagrant env_keep += "SSH_AUTH_SOCK" >> /etc/sudoers.d/vagrant
+/bin/echo "Defaults:vagrant !requiretty" >> /etc/sudoers.d/vagrant
+/bin/chmod 0660 /etc/sudoers.d/vagrant
+/bin/echo 'UseDNS no' >> /etc/ssh/sshd_config
+/bin/echo '127.0.0.1   vagrant-centos-7.vagrantup.com' >> /etc/hosts
+/usr/bin/yum -y clean all
+/bin/dd if=/dev/zero of=/boot/EMPTY bs=1M
+/bin/rm -f /boot/EMPTY
+/bin/dd if=/dev/zero of=/EMPTY bs=1M
+/bin/rm -f /EMPTY
+%end
